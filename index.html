@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>WEBGIS PERMUKIMAN BANDUNG RAYA</title><style>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"><meta name="theme-color" content="#06141c"><title>WEBGIS PERMUKIMAN BANDUNG RAYA</title><style>
 /* required styles */
 
 .leaflet-pane,
@@ -777,6 +777,61 @@ table.t{width:100%;border-collapse:collapse;min-width:820px}
 .leaflet-tooltip{background:var(--glass);color:var(--txt);border:1px solid var(--line);border-radius:8px;box-shadow:var(--sh);backdrop-filter:blur(8px);font-weight:600}
 .leaflet-tooltip-top:before,.leaflet-tooltip-bottom:before{display:none}
 @media(max-width:760px){.db{grid-template-columns:1fr}#banner{top:130px}}
+
+html{-webkit-text-size-adjust:100%;overscroll-behavior:none}
+body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
+button,summary,.item,.sg{touch-action:manipulation}
+:root{--acc2:#22d3ee;--hh:84px;--peek:100px}
+:root[data-theme="dark"]{--acc2:#38bdf8}
+.glass{backdrop-filter:blur(10px) saturate(1.3);-webkit-backdrop-filter:blur(10px) saturate(1.3)}
+#side,#detail,#stats,#dview,#banner{top:var(--hh)}
+.leaflet-tile-pane{transition:none}
+@media (hover:none),(pointer:coarse){:root[data-theme="dark"] #map.osm .leaflet-tile-pane{filter:none}}
+.pri{background:linear-gradient(135deg,var(--acc),var(--acc2));box-shadow:0 8px 20px -8px var(--acc)}
+.pri:active,.btn:active,.chip:active{transform:scale(.97)}
+.btn,.chip,.item,.seg button,.pri{transition:transform .15s,background .25s,border-color .25s,filter .2s}
+.seg button[aria-selected=true],.seg button[aria-pressed=true],.chip[aria-pressed=true]{background:linear-gradient(135deg,var(--acc),var(--acc2))}
+#top h1 em{background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.item{background:linear-gradient(90deg,var(--chip),transparent);animation:itemin .45s cubic-bezier(.22,1,.36,1) both;animation-delay:calc(var(--i,0)*24ms)}
+.item:hover{transform:translateX(3px);filter:none}
+@keyframes itemin{from{opacity:0;transform:translateY(8px)}}
+#detail.in{animation:dcard .45s cubic-bezier(.22,1,.36,1)}
+@keyframes dcard{from{opacity:0;transform:translateY(16px) scale(.98)}}
+#stats,#dview{animation:fadein .35s ease}@keyframes fadein{from{opacity:0}}
+.bar i{transform-origin:left;animation:grow .9s cubic-bezier(.22,1,.36,1) both}@keyframes grow{from{transform:scaleX(0)}}
+.ring{position:relative;width:20px;height:20px;border-radius:50%;border:3px solid #fff;background:rgba(255,255,255,.3);box-shadow:0 0 14px rgba(255,255,255,.8)}
+.ring:after{content:"";position:absolute;inset:-3px;border-radius:50%;border:2px solid #fff;animation:ping 1.7s cubic-bezier(.2,.6,.3,1) infinite}
+@keyframes ping{from{transform:scale(1);opacity:.9}to{transform:scale(3.4);opacity:0}}
+.leaflet-tooltip{backdrop-filter:none;background:var(--bg)}
+#sugg{display:flex;flex-direction:column;gap:5px}
+#sugg:empty{display:none}
+.sg{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:12px;background:var(--chip);border:1px solid var(--line);cursor:pointer;animation:itemin .3s both}
+.sg:hover{border-color:var(--acc)}.sg small{color:var(--mut);margin-left:auto;font-size:11.5px;text-align:right}
+#grab{display:none}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+@media(max-width:820px){
+ .glass{background:var(--bg);backdrop-filter:none;-webkit-backdrop-filter:none}
+ .glass{background:color-mix(in srgb,var(--bg) 94%,transparent)}
+ input,select,textarea{font-size:16px}
+ #top{left:8px;right:8px;top:8px;padding:9px 11px;gap:8px 10px;border-radius:16px}
+ #top h1{font-size:12.5px;min-width:0;flex:1 1 60%}
+ #top small{display:none}
+ #top nav.seg{order:3;width:100%}#top nav.seg button{flex:1;padding:7px 4px;font-size:13px}
+ #styles button{padding:5px 10px;font-size:12px}
+ #side{left:0;right:0;top:auto;bottom:0;width:100%;max-width:none;height:88vh;height:88dvh;border-radius:24px 24px 0 0;border-bottom:0;transition:transform .45s cubic-bezier(.22,1,.36,1);will-change:transform}
+ #side.drag{transition:none}
+ #grab{display:grid;place-items:center;height:30px;flex:none;touch-action:none;cursor:grab}
+ #grab:before{content:"";width:44px;height:5px;border-radius:3px;background:var(--mut);opacity:.55}
+ #side .in{padding:2px 14px calc(28px + env(safe-area-inset-bottom,0px));overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+ #detail{left:8px;right:8px;width:auto;top:auto;bottom:calc(var(--peek) + 10px);max-height:40vh;max-height:40dvh;z-index:790;border-radius:18px;padding:14px}
+ #detail h2{font-size:17px}
+ #legend{display:none}
+ #sheetslot #legend{display:flex;position:static;flex-wrap:wrap;gap:8px 14px;padding:10px 12px;border-radius:12px;box-shadow:none;border:1px solid var(--line);background:var(--chip);z-index:auto}
+ .leaflet-control-zoom,.leaflet-control-scale{display:none}
+ .leaflet-bottom.leaflet-right,.leaflet-bottom.leaflet-left{margin-bottom:var(--peek)}
+ #banner{left:8px;right:8px;transform:none;max-width:none;margin-top:6px;justify-content:space-between}
+ #stats,#dview{padding-left:8px;padding-right:8px}
+}
 </style></head><body>
 <div id="app">
   <div id="map" class="osm"></div>
@@ -786,9 +841,9 @@ table.t{width:100%;border-collapse:collapse;min-width:820px}
     <div class="seg" id="styles"><button data-s="dark" aria-pressed="false">Gelap</button><button data-s="light" aria-pressed="false">Terang</button></div>
   </header>
   <div id="banner" class="glass"><span id="bmsg"></span><button class="btn" id="bcan">Batal</button></div>
-  <aside id="side" class="glass"><div class="in">
-    <button class="pri" id="add">＋ Tambah permukiman</button>
-    <input type="search" id="q" placeholder="Cari nama, kecamatan, pengembang…" aria-label="Cari">
+  <aside id="side" class="glass"><div id="grab" aria-label="Geser panel"></div><div class="in">
+    <input type="search" id="q" placeholder="Cari perumahan / cluster…" aria-label="Cari" autocomplete="off" enterkeyhint="search"><div id="sugg"></div>
+    <button class="pri" id="add">＋ Tambah permukiman</button><div id="sheetslot"></div>
     <details open><summary>Filter</summary><div>
       <div class="row" id="fj"></div><div class="row" id="fw"></div>
       </div></details>
@@ -796,7 +851,7 @@ table.t{width:100%;border-collapse:collapse;min-width:820px}
       <label class="f">Titik A (asal)<input type="text" id="ra" list="dl" placeholder="Ketik nama permukiman…" autocomplete="off"></label>
       <div class="row"><button class="btn" data-g="A">📍 Lokasi saya</button><button class="btn" data-m="A">🖱 Pilih di peta</button></div>
       <label class="f">Titik B (tujuan)<input type="text" id="rb" list="dl" placeholder="Ketik nama permukiman…" autocomplete="off"></label>
-      <div class="row"><button class="btn" data-g="B">📍 Lokasi saya</button><button class="btn" data-m="B">🖱 Pilih di peta</button></div><datalist id="dl"></datalist>
+      <div class="row"><button class="btn" data-g="B">📍 Lokasi saya</button><button class="btn" data-m="B">🖱 Pilih di peta</button></div><datalist id="dl"></datalist><div id="gnote" style="font-size:12.5px;color:var(--mut)"></div>
       <div class="row"><button class="btn" id="rgo">Hitung rute</button><button class="btn" id="rsw">Tukar</button><button class="btn" id="rnear">Terdekat dari saya</button><button class="btn" id="rclr">Hapus</button></div>
       <div id="rres"></div>
       </div></details>
@@ -858,14 +913,14 @@ function pip(pt,g){const ring=(r)=>{let i=false;for(let a=0,b=r.length-1;a<r.len
 const whichW=(la,lo)=>{const r=R.find(r=>r.geometry&&pip([lo,la],r.geometry));return r?r.nama:null};
 
 /* ---------- MAP ---------- */
-const map=L.map("map",{center:[-6.93,107.6],zoom:11.25,minZoom:9,maxZoom:19,zoomSnap:.25,zoomControl:false});
+const map=L.map("map",{center:[-6.93,107.6],zoom:11.25,minZoom:9,maxZoom:19,zoomSnap:.25,zoomDelta:.5,wheelPxPerZoomLevel:90,zoomControl:false,preferCanvas:true,renderer:L.canvas({padding:.5,tolerance:6})});
 L.control.zoom({position:"bottomright"}).addTo(map);L.control.scale({imperial:false,position:"bottomright"}).addTo(map);
-L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,updateWhenIdle:false,updateWhenZooming:false,keepBuffer:4,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
 map.getContainer().classList.add("osm");
 function setBase(){}
-const bl=L.layerGroup().addTo(map),al=L.layerGroup().addTo(map),ll=L.layerGroup().addTo(map),rl=L.layerGroup().addTo(map),tl=L.layerGroup().addTo(map),pl=L.layerGroup().addTo(map);
+const bl=L.layerGroup().addTo(map),al=L.layerGroup().addTo(map),ll=L.layerGroup().addTo(map),rl=L.layerGroup().addTo(map),tl=L.layerGroup().addTo(map),pl=L.layerGroup().addTo(map),accl=L.layerGroup().addTo(map),sl=L.layerGroup().addTo(map);
 R.forEach(r=>{if(!r.geometry)return;const c=WC[r.nama],i=Object.keys(WC).indexOf(r.nama);
- const g=L.geoJSON(r.geometry,{style:{color:c,weight:2,fillColor:c,fillOpacity:.05,className:"reg rg-"+i,dashArray:"7 6"},interactive:false}).addTo(bl);
+ const g=L.geoJSON(r.geometry,{style:{color:c,weight:2,fillColor:c,fillOpacity:.05,dashArray:"7 6"},interactive:false}).addTo(bl);
  const b=g.getBounds().getCenter(),LP={"Kota Bandung":[-6.945,107.655],"Kota Cimahi":[-6.885,107.51],"Kabupaten Bandung":[-7.06,107.56],"Kabupaten Bandung Barat":[-6.8,107.46]};
  L.marker(LP[r.nama]||b,{icon:L.divIcon({className:"lab w",html:`<span>${r.nama}</span>`,iconSize:[0,0]}),interactive:false}).addTo(ll)});
 const zc=()=>map.getContainer().classList.toggle("zlo",map.getZoom()<=11.5);
@@ -873,7 +928,8 @@ function bounds(s){const[S_,N,W,E]=s.b;const p1=map.latLngToContainerPoint([S_,W
  const w=Math.abs(p2.x-p1.x)<m,h=Math.abs(p1.y-p2.y)<m;if(!w&&!h)return[[S_,W],[N,E]];
  const cx=(p1.x+p2.x)/2,cy=(p1.y+p2.y)/2,a=map.containerPointToLatLng([cx-m/2,cy+m/2]),b=map.containerPointToLatLng([cx+m/2,cy-m/2]);
  return[[h?a.lat:S_,w?a.lng:W],[h?b.lat:N,w?b.lng:E]]}
-const filt=()=>D.filter(s=>placed(s)&&(!st.j.size||st.j.has(s.jenis))&&(!st.w.size||st.w.has(s.wilayah))&&(!st.q||(s.nama+" "+(s.kecamatan||"")+" "+(s.pengembang||"")).toLowerCase().includes(st.q)));
+const fA=()=>D.filter(s=>placed(s)&&(!st.j.size||st.j.has(s.jenis))&&(!st.w.size||st.w.has(s.wilayah)));
+const filt=()=>fA().filter(s=>!st.q||(s.nama+" "+(s.kecamatan||"")+" "+(s.pengembang||"")).toLowerCase().includes(st.q));
 function chips(el,vals,set,colors){vals.forEach(v=>{const b=document.createElement("button");b.className="chip";b.setAttribute("aria-pressed","false");
  b.innerHTML=`<span class="dot" style="background:${colors[v]}"></span>${v}`;b.onclick=()=>{set.has(v)?set.delete(v):set.add(v);b.setAttribute("aria-pressed",set.has(v));render()};el.appendChild(b)})}
 chips($("fj"),Object.keys(JC),st.j,JC);chips($("fw"),Object.keys(WC),st.w,WC);
@@ -887,23 +943,38 @@ function show(s){st.sel=s;const f=s.fasilitas&&s.fasilitas.length?s.fasilitas.jo
  <dt>Pusat</dt><dd>${s.lat.toFixed(5)}, ${s.lon.toFixed(5)}</dd><dt>Sumber</dt><dd>${esc(s.sumber_data||"-")}</dd></dl>
  <div class="row" style="margin-top:12px"><button class="btn" id="dA">Rute dari sini</button><button class="btn" id="dB">Rute ke sini</button><button class="btn" id="dE">Ubah</button><button class="btn danger" id="dD">Hapus</button></div>
  <p style="margin:10px 0 0"><a href="https://www.openstreetmap.org/?mlat=${s.lat}&mlon=${s.lon}#map=17/${s.lat}/${s.lon}" target="_blank" rel="noopener" style="color:var(--acc);font-weight:600">Buka di OpenStreetMap ↗</a></p>`;
- $("detail").style.display="block";
+ {const d=$("detail");d.style.display="block";d.classList.remove("in");void d.offsetWidth;d.classList.add("in")}
  $("dA").onclick=()=>setNode("A",{lat:s.lat,lon:s.lon,label:s.nama,id:s.id});$("dB").onclick=()=>setNode("B",{lat:s.lat,lon:s.lon,label:s.nama,id:s.id});
  $("dE").onclick=()=>openForm(s);$("dD").onclick=()=>del(s)}
-function pick(s,fly){show(s);if(fly)map.flyToBounds([[s.b[0],s.b[2]],[s.b[1],s.b[3]]],{maxZoom:17,padding:[80,80],duration:.7});render()}
-function render(){const d=filt();$("n").textContent=d.length;$("cnt").textContent=D.filter(placed).length;al.clearLayers();
-  [...d].sort((a,b)=>(b.a||0)-(a.a||0)).forEach(s=>{const sel=st.sel&&st.sel.id===s.id,c=JC[s.jenis];
-  L.polygon(latlngsOf(s),{color:sel?"#fff":c,fillColor:c,weight:sel?3:1.6,fillOpacity:.4,className:"area j-"+s.jenis+(sel?" sel":""),bubblingMouseEvents:false})
-   .bindTooltip(`<b>${esc(s.nama)}</b><br>${esc(s.kecamatan||"")}`,{sticky:true}).on("click",e=>mode?onClick(e):pick(s,false)).addTo(al)});
- const l=$("list");l.innerHTML="";[...d].sort((a,b)=>a.nama.localeCompare(b.nama)).forEach(s=>{const e=document.createElement("div");e.className="item";e.style.setProperty("--c",JC[s.jenis]);
+function fit(s){const mob=isMob(),H=innerHeight,hh=parseInt(getComputedStyle(document.documentElement).getPropertyValue("--hh"))||84;
+ map.flyToBounds([[s.b[0],s.b[2]],[s.b[1],s.b[3]]],mob?{paddingTopLeft:[24,hh+14],paddingBottomRight:[24,PEEK+Math.min(.4*H,340)+18],maxZoom:17,duration:1,easeLinearity:.25}:{paddingTopLeft:[380,hh+10],paddingBottomRight:[350,24],maxZoom:17,duration:1,easeLinearity:.25})}
+function pick(s,fly){show(s);if(isMob())setSheet("peek");if(fly)fit(s);drawAreas()}
+function drawAreas(){al.clearLayers();sl.clearLayers();const hov=matchMedia("(hover:hover)").matches;
+ [...fA()].sort((a,b)=>((st.sel&&st.sel.id===a.id)-(st.sel&&st.sel.id===b.id))||(b.a||0)-(a.a||0)).forEach(s=>{const sel=st.sel&&st.sel.id===s.id,c=JC[s.jenis];
+  const p=L.polygon(latlngsOf(s),{color:sel?"#fff":c,fillColor:c,weight:sel?3:1.6,fillOpacity:sel?.62:.4,bubblingMouseEvents:false})
+   .bindTooltip(`<b>${esc(s.nama)}</b><br>${esc(s.kecamatan||"")}`,{sticky:true}).on("click",e=>mode?onClick(e):pick(s,false));
+  if(hov&&!sel)p.on("mouseover",()=>p.setStyle({fillOpacity:.7})).on("mouseout",()=>p.setStyle({fillOpacity:.4}));p.addTo(al);
+  if(sel)L.marker([s.lat,s.lon],{icon:L.divIcon({className:"",html:'<div class="ring"></div>',iconSize:[20,20],iconAnchor:[10,10]}),interactive:false,keyboard:false}).addTo(sl)})}
+function render(){const d=filt(),a=fA();$("n").textContent=d.length;$("cnt").textContent=D.filter(placed).length;drawAreas();
+ const l=$("list");l.innerHTML="";[...d].sort((x,y)=>x.nama.localeCompare(y.nama)).forEach((s,i)=>{const e=document.createElement("div");e.className="item";e.style.setProperty("--c",JC[s.jenis]);e.style.setProperty("--i",Math.min(i,14));
   e.innerHTML=`<b>${esc(s.nama)}</b><span>${esc(s.kecamatan||"")} · ${s.wilayah}</span>`;e.onclick=()=>pick(s,true);l.appendChild(e)});
-
- const c={};d.forEach(s=>c[s.jenis]=(c[s.jenis]||0)+1);$("legend").innerHTML=Object.keys(JC).map(k=>`<span><span class="dot" style="background:${JC[k]}"></span>${k} <b>${c[k]||0}</b></span>`).join("");
+ const c={};a.forEach(s=>c[s.jenis]=(c[s.jenis]||0)+1);$("legend").innerHTML=Object.keys(JC).map(k=>`<span><span class="dot" style="background:${JC[k]}"></span>${k} <b>${c[k]||0}</b></span>`).join("");
  const un=D.filter(s=>!placed(s)).length;if(un)$("legend").innerHTML+=`<span class="warn">${un} belum berkoordinat (lihat Kelola Data)</span>`;
- buildSel();buildStats();buildTable()}
-$("q").oninput=e=>{st.q=e.target.value.trim().toLowerCase();render()};
+ buildSel();if($("stats").style.display==="grid")buildStats();if($("dview").style.display==="block")buildTable()}
+function rank(q){q=q.toLowerCase().trim();if(q.length<2)return[];const tk=q.split(/\s+/),out=[];D.forEach(s=>{const n=s.nama.toLowerCase();let sc=0;
+ if(n===q)sc=100;else if(n.startsWith(q))sc=80;else if(n.split(/\s+/).some(w=>w.startsWith(q)))sc=60;else if(n.includes(q))sc=45;else if(tk.length>1&&tk.every(t=>n.includes(t)))sc=35;else if(((s.kecamatan||"")+" "+(s.pengembang||"")).toLowerCase().includes(q))sc=10;
+ if(sc)out.push({s,sc:sc+(placed(s)?1:0)})});return out.sort((a,b)=>b.sc-a.sc||((b.s.jenis==="township")-(a.s.jenis==="township"))||((b.s.a||0)-(a.s.a||0))||a.s.nama.length-b.s.nama.length)}
+let qt=null,lastFly=null;
+function choose(s){$("q").value=s.nama;st.q=s.nama.toLowerCase();$("sugg").innerHTML="";$("q").blur();lastFly=s.id;ensurePlaced(s,()=>pick(s,true));render()}
+function doSearch(){const q=$("q").value.trim(),r=rank(q);st.q=q.toLowerCase();render();
+ $("sugg").innerHTML=r.slice(0,6).map((x,i)=>`<div class="sg" data-i="${x.s.id}" style="animation-delay:${i*35}ms"><span class="dot" style="background:${JC[x.s.jenis]};margin:0"></span><b>${esc(x.s.nama)}</b><small>${esc(x.s.kecamatan||x.s.wilayah)}${placed(x.s)?"":" ⚠"}</small></div>`).join("");
+ const t=r[0];if(q.length>=3&&t&&placed(t.s)&&lastFly!==t.s.id&&(t.sc>=100||(t.sc>=80&&(r.length===1||r[1].sc<80||q.length>=6))||(t.sc>=60&&(r.length===1||r[1].sc<60)))){lastFly=t.s.id;pick(t.s,true)}}
+$("q").oninput=()=>{clearTimeout(qt);if(!$("q").value.trim()){st.q="";lastFly=null;$("sugg").innerHTML="";render();return}qt=setTimeout(doSearch,380)};
+$("q").addEventListener("keydown",e=>{if(e.key==="Enter"){const r=rank($("q").value);if(r[0])choose(r[0].s)}});
+$("q").addEventListener("focus",()=>{if(isMob())setSheet("half")});
+$("sugg").onclick=e=>{const el=e.target.closest(".sg");if(el)choose(D.find(x=>x.id===el.dataset.i))};
 $("x").onclick=()=>{$("detail").style.display="none";st.sel=null;render()};
-map.on("zoomend",()=>{zc();render()});zc();
+map.on("zoomend",()=>{zc();drawAreas()});zc();
 
 /* ---------- BENTUK AREA ---------- */
 const FKEY="wgpbr-fp-v1",FFKEY="wgpbr-fpf-v1";let FP={},FPF={};
@@ -934,7 +1005,7 @@ $("fpre").onclick=()=>{FPF={};saveFP();loadFP()};
 /* ---------- PICK MODES ---------- */
 let mode=null,p1=null,prev=null,draft=null,placing=null;
 const banner=(t)=>{$("banner").style.display=t?"flex":"none";$("bmsg").textContent=t||"";map.getContainer().classList.toggle("picking",!!t)};
-function startPick(m){mode=m;p1=null;pl.clearLayers();banner({pt:"Klik titik pusat permukiman di peta",rc:"Klik sudut pertama area",A:"Klik titik A (asal) di peta",B:"Klik titik B (tujuan) di peta"}[m])}
+function startPick(m){if(isMob())setSheet("peek");mode=m;p1=null;pl.clearLayers();banner({pt:"Klik titik pusat permukiman di peta",rc:"Klik sudut pertama area",A:"Klik titik A (asal) di peta",B:"Klik titik B (tujuan) di peta"}[m])}
 function endPick(){mode=null;p1=null;pl.clearLayers();banner("")}
 $("bcan").onclick=()=>{const wasForm=mode==="pt"||mode==="rc";endPick();if(wasForm)$("dlg").showModal()};
 map.on("mousemove",e=>{if(mode==="rc"&&p1){pl.clearLayers();L.rectangle([p1,e.latlng],{color:"#38bdf8",weight:2,dashArray:"5 5"}).addTo(pl)}});
@@ -982,7 +1053,13 @@ function buildSel(){LB={};const seen={};const o=[...D].sort((a,b)=>a.nama.locale
 const findRec=v=>{v=v.trim();if(!v)return null;const id=LB[v];if(id)return D.find(x=>x.id===id);const l=v.toLowerCase();return D.find(x=>x.nama.toLowerCase()===l)||null};
 function setNode(k,n){if(k==="A")RA=n;else RB=n;$("ra").value=RA?RA.label:"";$("rb").value=RB?RB.label:"";drawNodes();if(RA&&RB)routeGo()}
 function drawNodes(){nlg.clearLayers();[[RA,"A","#34d399"],[RB,"B","#f43f5e"]].forEach(([n,t,c])=>{if(n)L.marker([n.lat,n.lon],{icon:L.divIcon({className:"",html:`<div style="width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${c};border:3px solid #fff;box-shadow:0 2px 8px #0008;display:grid;place-items:center"><b style="transform:rotate(45deg);color:#fff;font-size:12px">${t}</b></div>`,iconSize:[26,26],iconAnchor:[13,26]})}).bindTooltip(n.label).addTo(nlg)})}
-function gps(cb,err){if(!navigator.geolocation){err("Geolocation tidak didukung");return}navigator.geolocation.getCurrentPosition(p=>cb(p.coords),()=>err("Izin lokasi ditolak / tidak tersedia"),{timeout:9000,enableHighAccuracy:true})}
+function gps(cb,err){const g=$("gnote");if(!navigator.geolocation){err("Geolocation tidak didukung");return}
+ let best=null,fin=false,id;const end=()=>{if(fin)return;fin=true;navigator.geolocation.clearWatch(id);clearTimeout(tm);
+  if(best){accl.clearLayers();L.circle([best.latitude,best.longitude],{radius:best.accuracy,color:"#38bdf8",weight:1,fillOpacity:.12,interactive:false}).addTo(accl);
+   const a=Math.round(best.accuracy);g.innerHTML=`Akurasi lokasi ±${a} m`+(a>150?`<br><span class="warn">Akurasi rendah: posisi diperkirakan dari jaringan/IP. iPhone: Pengaturan › Privasi › Layanan Lokasi › Situs Web Safari › Presisi Lokasi. Android: nyalakan GPS (Lokasi presisi). Laptop tanpa GPS memang kurang akurat.</span>`:"");cb(best)}else err("Lokasi tidak ditemukan")};
+ const tm=setTimeout(end,14000);g.textContent="Mencari lokasi…";
+ id=navigator.geolocation.watchPosition(p=>{if(!best||p.coords.accuracy<best.accuracy)best=p.coords;g.textContent=`Memperbaiki akurasi… ±${Math.round(best.accuracy)} m`;if(best.accuracy<=25)end()},
+  e=>{if(best)return;fin=true;clearTimeout(tm);navigator.geolocation.clearWatch(id);g.textContent="";err(e.code===1?"Izin lokasi ditolak. Aktifkan izin lokasi untuk situs ini.":"Lokasi tidak tersedia")},{enableHighAccuracy:true,maximumAge:0,timeout:20000})}
 function ensurePlaced(s,cb){if(placed(s))return cb();placing={s,cb};startPick("place");banner(`"${s.nama}" belum punya koordinat. Klik lokasinya di peta`)}
 const useRec=(k,s)=>ensurePlaced(s,()=>setNode(k,{lat:s.lat,lon:s.lon,label:s.nama,id:s.id}));
 ["ra","rb"].forEach((id,i)=>{const k=i?"B":"A";$(id).addEventListener("change",e=>{const v=e.target.value;if(!v.trim()){k==="A"?RA=null:RB=null;drawNodes();return}
@@ -990,7 +1067,7 @@ const useRec=(k,s)=>ensurePlaced(s,()=>setNode(k,{lat:s.lat,lon:s.lon,label:s.na
 document.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{const k=b.dataset.g;gps(c=>setNode(k,{lat:c.latitude,lon:c.longitude,label:"Lokasi saya",gps:1}),m=>$("rres").innerHTML=`<div class="res warn">${m}</div>`)});
 document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>startPick(b.dataset.m));
 $("rsw").onclick=()=>{[RA,RB]=[RB,RA];drawNodes();buildSel();if(RA&&RB)routeGo()};$("rgo").onclick=()=>routeGo();
-$("rclr").onclick=()=>{RA=RB=null;rl.clearLayers();nlg.clearLayers();$("rres").innerHTML="";buildSel()};
+$("rclr").onclick=()=>{RA=RB=null;rl.clearLayers();nlg.clearLayers();accl.clearLayers();$("gnote").textContent="";$("rres").innerHTML="";buildSel()};
 $("rnear").onclick=()=>gps(c=>{let b=null,bd=1e9;D.filter(placed).forEach(s=>{const d=dist(c.latitude,c.longitude,s.lat,s.lon);if(d<bd){bd=d;b=s}});
  RA={lat:c.latitude,lon:c.longitude,label:"Lokasi saya",gps:1};setNode("B",{lat:b.lat,lon:b.lon,label:b.nama,id:b.id});pick(b,false)},m=>$("rres").innerHTML=`<div class="res warn">${m}</div>`);
 async function routeGo(quiet){if(!RA||!RB)return;let km,min,co,est=false;if(!quiet)$("rres").innerHTML='<div class="res">Menghitung rute…</div>';
@@ -1038,13 +1115,31 @@ $("ecsv").onclick=()=>{const k=["nama","jenis","wilayah","kecamatan","pengembang
 $("rst").onclick=()=>{if(confirm("Kembalikan ke data awal? Semua perubahan Anda akan hilang.")){try{localStorage.removeItem(KEY)}catch(e){}D=load();st.sel=null;$("detail").style.display="none";render()}};
 
 /* ---------- VIEWS & THEME ---------- */
-function view(v){$("stats").style.display=v==="stat"?"grid":"none";$("dview").style.display=v==="data"?"block":"none";
+function view(v){if(v==="stat")buildStats();if(v==="data")buildTable();$("stats").style.display=v==="stat"?"grid":"none";$("dview").style.display=v==="data"?"block":"none";
  ["side","legend"].forEach(i=>$(i).style.visibility=v==="map"?"visible":"hidden");if(v!=="map")$("detail").style.display="none";
  ["map","stat","data"].forEach(k=>$("v-"+k).setAttribute("aria-selected",k===v));if(v==="map")setTimeout(()=>map.invalidateSize(),50)}
 ["map","stat","data"].forEach(k=>$("v-"+k).onclick=()=>view(k));
 function style(k){document.documentElement.dataset.theme=k;document.querySelectorAll("#styles button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.s===k));setBase()}
 document.querySelectorAll("#styles button").forEach(b=>b.onclick=()=>style(b.dataset.s));
 style(matchMedia("(prefers-color-scheme:light)").matches?"light":"dark");
-render();loadFP();new ResizeObserver(()=>map.invalidateSize()).observe($("map"));
+/* ---------- LAYOUT MOBILE (iPhone & Android) ---------- */
+const mq=matchMedia("(max-width:820px)"),isMob=()=>mq.matches,PEEK=100;let sheet="peek";
+const side=$("side"),inner=side.querySelector(".in");
+const vis=k=>k==="full"?side.offsetHeight:k==="half"?Math.round(innerHeight*.56):PEEK;
+function setSheet(k,animate=true){sheet=k;if(!isMob()){side.style.transform="";inner.style.maxHeight="";return}
+ const H=side.offsetHeight;side.classList.toggle("drag",!animate);side.style.transform=`translateY(${H-vis(k)}px)`;inner.style.maxHeight=(vis(k)-34)+"px"}
+(function(){const g=$("grab");let y0=0,ty0=0,t0=0,moved=0,on=false;
+ g.addEventListener("pointerdown",e=>{if(!isMob())return;on=true;moved=0;y0=e.clientY;t0=performance.now();ty0=side.offsetHeight-vis(sheet);g.setPointerCapture(e.pointerId);side.classList.add("drag")});
+ g.addEventListener("pointermove",e=>{if(!on)return;const dy=e.clientY-y0,H=side.offsetHeight;moved=Math.max(moved,Math.abs(dy));side.style.transform=`translateY(${Math.min(H-PEEK,Math.max(0,ty0+dy))}px)`;inner.style.maxHeight=(H-34)+"px"});
+ const end=e=>{if(!on)return;on=false;side.classList.remove("drag");const dy=e.clientY-y0,v=dy/Math.max(1,performance.now()-t0),H=side.offsetHeight;
+  if(moved<6){setSheet(sheet==="peek"?"half":sheet==="half"?"full":"peek");return}
+  const ty=Math.min(H-PEEK,Math.max(0,ty0+dy+v*180));setSheet(["full","half","peek"].map(k=>[k,Math.abs(H-vis(k)-ty)]).sort((a,b)=>a[1]-b[1])[0][0])};
+ g.addEventListener("pointerup",end);g.addEventListener("pointercancel",end)})();
+const hh=()=>{const t=$("top");document.documentElement.style.setProperty("--hh",(t.offsetTop+t.offsetHeight+10)+"px")};
+function layout(){$(isMob()?"sheetslot":"app").appendChild($("legend"));setSheet(sheet,false);hh();setTimeout(()=>map.invalidateSize(),60)}
+mq.addEventListener?mq.addEventListener("change",layout):mq.addListener(layout);
+addEventListener("resize",()=>{hh();setSheet(sheet,false)});addEventListener("orientationchange",()=>setTimeout(layout,250));
+new ResizeObserver(hh).observe($("top"));
+render();loadFP();layout();if(isMob())map.fitBounds([[-7.0,107.47],[-6.82,107.72]],{paddingTopLeft:[8,parseInt(getComputedStyle(document.documentElement).getPropertyValue("--hh"))||110],paddingBottomRight:[8,PEEK+8],animate:false});new ResizeObserver(()=>map.invalidateSize()).observe($("map"));
 </script>
 </body></html>
