@@ -940,15 +940,17 @@ chips($("fj"),Object.keys(JC),st.j,JC);chips($("fw"),Object.keys(WC),st.w,WC);
 /* ---------- DETAIL ---------- */
 function show(s){st.sel=s;const f=s.fasilitas&&s.fasilitas.length?s.fasilitas.join(", "):"-";
  $("dbody").innerHTML=`<h2>${esc(s.nama)}</h2><span class="badge" style="border-color:${JC[s.jenis]}"><span class="dot" style="background:${JC[s.jenis]}"></span>${JN[s.jenis]}</span><span class="badge">${s.wilayah}</span>
- <span class="badge">${(FP[fk(s)]||FPN[nk(s)])?"Bentuk asli OSM":"Bentuk perkiraan"} · ${fmt(s.a)} ha</span>
+ <span class="badge">${s.poly?"Batas manual":(FP[fk(s)]||FPN[nk(s)])?"Bentuk asli OSM":"Bentuk perkiraan"} · ${fmt(s.a)} ha</span>
  <dl><dt>Kecamatan</dt><dd>${esc(s.kecamatan||"-")}</dd><dt>Pengembang</dt><dd>${esc(s.pengembang||"Belum terdata")}</dd><dt>Tahun</dt><dd>${s.tahun_berdiri??"-"}</dd>
  <dt>Luas data</dt><dd>${s.luas_ha!=null?fmt(s.luas_ha)+" ha":"-"}</dd><dt>Unit</dt><dd>${fmt(s.jumlah_unit)}</dd><dt>Fasilitas</dt><dd>${esc(f)}</dd>
  <dt>Pusat</dt><dd>${s.lat.toFixed(5)}, ${s.lon.toFixed(5)}</dd><dt>Sumber</dt><dd>${esc(s.sumber_data||"-")}</dd></dl>
  <div class="row" style="margin-top:12px"><button class="btn" id="dA">Rute dari sini</button><button class="btn" id="dB">Rute ke sini</button><button class="btn" id="dE">Ubah</button><button class="btn danger" id="dD">Hapus</button></div>
+ <div class="row" style="margin-top:8px"><button class="btn" id="dP">Gambar batas manual</button>${s.poly?'<button class="btn" id="dPx">Hapus batas manual</button>':""}</div>
  <p style="margin:10px 0 0"><a href="https://www.openstreetmap.org/?mlat=${s.lat}&mlon=${s.lon}#map=17/${s.lat}/${s.lon}" target="_blank" rel="noopener" style="color:var(--acc);font-weight:600">Buka di OpenStreetMap ↗</a></p>`;
  {const d=$("detail");d.style.display="block";d.classList.remove("in");void d.offsetWidth;d.classList.add("in")}
  $("dA").onclick=()=>setNode("A",{lat:s.lat,lon:s.lon,label:s.nama,id:s.id});$("dB").onclick=()=>setNode("B",{lat:s.lat,lon:s.lon,label:s.nama,id:s.id});
- $("dE").onclick=()=>openForm(s);$("dD").onclick=()=>del(s)}
+ $("dE").onclick=()=>openForm(s);$("dD").onclick=()=>del(s);
+ $("dP").onclick=()=>startPoly(s);if($("dPx"))$("dPx").onclick=()=>{delete s.poly;save();render();show(s)}}
 function fit(s){const mob=isMob(),H=innerHeight,hh=parseInt(getComputedStyle(document.documentElement).getPropertyValue("--hh"))||84;
  map.flyToBounds([[s.b[0],s.b[2]],[s.b[1],s.b[3]]],mob?{paddingTopLeft:[24,hh+14],paddingBottomRight:[24,PEEK+Math.min(.4*H,340)+18],maxZoom:17,duration:1,easeLinearity:.25}:{paddingTopLeft:[380,hh+10],paddingBottomRight:[350,24],maxZoom:17,duration:1,easeLinearity:.25})}
 function pick(s,fly){show(s);if(isMob())setSheet("peek");if(fly)fit(s);drawAreas()}
@@ -986,7 +988,7 @@ const saveFP=()=>{try{localStorage.setItem(FKEY,JSON.stringify(FP));localStorage
 const fk=s=>s.oid&&(s.ot==="W"||s.ot==="R")?s.ot+s.oid:null;
 const dec=r=>{const k=Math.ceil(r.length/160),o=[];for(let i=0;i<r.length;i+=k)o.push([+r[i][1].toFixed(5),+r[i][0].toFixed(5)]);return o};
 const toPolys=g=>(g.type==="Polygon"?[g.coordinates]:g.coordinates).map(p=>p.map(dec));
-function latlngsOf(s){const k=fk(s)||nk(s);let P=k&&(FP[k]||FPN[k]);
+function latlngsOf(s){const k=fk(s)||nk(s);let P=s.poly?[[s.poly]]:k&&(FP[k]||FPN[k]);
  if(!P){let[S_,N,W,E]=s.b;
   if(s.ot==="N"&&!s.sh&&s.a>100)[S_,N,W,E]=sqB(s.lat,s.lon,Math.min(s.luas_ha||2,40));
   if(s.sh==="rect"||s.ot==="N")P=[[[[S_,W],[S_,E],[N,E],[N,W]]]][0];
@@ -1036,16 +1038,36 @@ $("fpre").onclick=()=>{FPF={};FPN={};saveFP();saveFPN();loadFP().finally(loadNod
 let mode=null,p1=null,prev=null,draft=null,placing=null;
 const banner=(t)=>{$("banner").style.display=t?"flex":"none";$("bmsg").textContent=t||"";map.getContainer().classList.toggle("picking",!!t)};
 function startPick(m){if(isMob())setSheet("peek");mode=m;p1=null;pl.clearLayers();banner({pt:"Klik titik pusat permukiman di peta",rc:"Klik sudut pertama area",A:"Klik titik A (asal) di peta",B:"Klik titik B (tujuan) di peta"}[m])}
-function endPick(){mode=null;p1=null;pl.clearLayers();banner("")}
+function endPick(){mode=null;p1=null;pl.clearLayers();banner("");polyPts=[];const x=$("bdone");if(x){x.style.display="none";$("bundo").style.display="none"}}
 $("bcan").onclick=()=>{const wasForm=mode==="pt"||mode==="rc";endPick();if(wasForm)$("dlg").showModal()};
 map.on("mousemove",e=>{if(mode==="rc"&&p1){pl.clearLayers();L.rectangle([p1,e.latlng],{color:"#38bdf8",weight:2,dashArray:"5 5"}).addTo(pl)}});
 function onClick(e){const{lat,lng}=e.latlng;
+ if(mode==="poly"){polyAdd(e.latlng);return}
  if(mode==="A"||mode==="B"){const m=mode;endPick();setNode(m,{lat,lon:lng,label:`Titik peta (${lat.toFixed(4)}, ${lng.toFixed(4)})`})}
  else if(mode==="place"){const{s,cb}=placing;endPick();placing=null;s.lat=+lat.toFixed(6);s.lon=+lng.toFixed(6);s.b=sqB(lat,lng,s.luas_ha||2);s.a=+areaHa(s.b).toFixed(1);s.e=1;const w=whichW(lat,lng);if(w)s.wilayah=w;save();render();cb();show(s)}
  else if(mode==="pt"){endPick();const ha=+$("f-luas").value||2;draft.lat=+lat.toFixed(6);draft.lon=+lng.toFixed(6);draft.b=sqB(lat,lng,ha);draft.sh="rect";draft.oid=null;draft.a=+areaHa(draft.b).toFixed(1);afterLoc()}
  else if(mode==="rc"){if(!p1){p1=e.latlng;banner("Klik sudut kedua (diagonal)")}else{const a=p1,b=e.latlng;endPick();draft.b=[Math.min(a.lat,b.lat),Math.max(a.lat,b.lat),Math.min(a.lng,b.lng),Math.max(a.lng,b.lng)].map(v=>+v.toFixed(6));
   draft.lat=+((draft.b[0]+draft.b[1])/2).toFixed(6);draft.lon=+((draft.b[2]+draft.b[3])/2).toFixed(6);draft.a=+areaHa(draft.b).toFixed(1);draft.luas_ha=draft.a;draft.sh="rect";draft.oid=null;afterLoc()}}}
 map.on("click",e=>{if(mode)onClick(e)});
+$("bcan").insertAdjacentHTML("beforebegin",'<button class="btn" id="bundo" style="display:none">Urungkan titik</button><button class="btn" id="bdone" style="display:none">Selesai</button>');
+let polyPts=[],polyS=null;
+function polyDraw(cur){pl.clearLayers();if(!polyPts.length)return;const pts=cur?polyPts.concat([[cur.lat,cur.lng]]):polyPts;
+ if(polyPts.length>2)L.polygon(polyPts,{color:"#fbbf24",weight:0,fillOpacity:.2,interactive:false}).addTo(pl);
+ L.polyline(pts,{color:"#fbbf24",weight:2.5,dashArray:"6 4",interactive:false}).addTo(pl);
+ polyPts.forEach(p=>L.circleMarker(p,{radius:4,color:"#fbbf24",fillColor:"#fbbf24",fillOpacity:1,interactive:false}).addTo(pl))}
+const polyMsg=()=>banner("Gambar batas "+polyS.nama+": "+polyPts.length+" titik. Klik di peta mengikuti tepi area (min. 3 titik), lalu tekan Selesai.");
+function polyAdd(ll){polyPts.push([+ll.lat.toFixed(6),+ll.lng.toFixed(6)]);polyDraw();polyMsg()}
+map.on("mousemove",e=>{if(mode==="poly"&&polyPts.length)polyDraw(e.latlng)});
+function startPoly(s){if(isMob())setSheet("peek");polyS=s;polyPts=[];pl.clearLayers();mode="poly";polyMsg();$("bdone").style.display="";$("bundo").style.display="";
+ map.flyToBounds([[s.b[0],s.b[2]],[s.b[1],s.b[3]]],{maxZoom:17,duration:.8})}
+document.addEventListener("click",ev=>{
+ if(ev.target.id==="bundo"){polyPts.pop();polyDraw();polyMsg()}
+ else if(ev.target.id==="bdone"){if(polyPts.length<3){banner("Minimal 3 titik. Klik lagi di peta.");return}
+  const s=polyS,P=polyPts.slice(),la=P.map(p=>p[0]),lo=P.map(p=>p[1]);
+  s.poly=P;s.b=[Math.min(...la),Math.max(...la),Math.min(...lo),Math.max(...lo)].map(v=>+v.toFixed(6));
+  const c=Math.cos(la[0]*Math.PI/180)*111.32,xy=P.map(p=>[p[1]*c,p[0]*111.32]);let ar=0;
+  for(let i=0;i<xy.length;i++){const j=(i+1)%xy.length;ar+=xy[i][0]*xy[j][1]-xy[j][0]*xy[i][1]}
+  s.a=+(Math.abs(ar)/2*100).toFixed(1);s.e=1;save();endPick();render();show(s)}});
 function afterLoc(){const w=whichW(draft.lat,draft.lon);if(w)draft.wilayah=w;fillForm();$("dlg").showModal()}
 
 /* ---------- FORM ---------- */
@@ -1139,7 +1161,7 @@ function buildTable(){const q=$("dq").value.trim().toLowerCase(),w=$("dw").value
 $("dtb").onclick=e=>{const b=e.target.closest("button");if(!b)return;const s=D.find(x=>x.id===b.dataset.i);if(b.dataset.a==="e")openForm(s);else if(b.dataset.a==="d")del(s);else{view("map");pick(s,true)}};
 $("pp").onclick=()=>{pg=Math.max(0,pg-1);buildTable()};$("pn").onclick=()=>{pg++;buildTable()};
 const dl=(n,t,m)=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:m}));a.download=n;a.click()};
-$("egj").onclick=()=>dl("permukiman-bandung-raya.geojson",JSON.stringify({type:"FeatureCollection",features:D.filter(placed).map(s=>{const[S_,N,W,E]=s.b,{b,e,...p}=s;return{type:"Feature",geometry:(FP[fk(s)]||FPN[nk(s)])?{type:"MultiPolygon",coordinates:(FP[fk(s)]||FPN[nk(s)]).map(pg=>pg.map(r=>r.map(q=>[q[1],q[0]])))}:{type:"Polygon",coordinates:[[[W,S_],[E,S_],[E,N],[W,N],[W,S_]]]},properties:p}})},null,1),"application/geo+json");
+$("egj").onclick=()=>dl("permukiman-bandung-raya.geojson",JSON.stringify({type:"FeatureCollection",features:D.filter(placed).map(s=>{const[S_,N,W,E]=s.b,{b,e,poly,...p}=s;return{type:"Feature",geometry:(s.poly||FP[fk(s)]||FPN[nk(s)])?{type:"MultiPolygon",coordinates:(s.poly?[[s.poly]]:(FP[fk(s)]||FPN[nk(s)])).map(pg=>pg.map(r=>r.map(q=>[q[1],q[0]])))}:{type:"Polygon",coordinates:[[[W,S_],[E,S_],[E,N],[W,N],[W,S_]]]},properties:p}})},null,1),"application/geo+json");
 $("ecsv").onclick=()=>{const k=["nama","jenis","wilayah","kecamatan","pengembang","tahun_berdiri","luas_ha","jumlah_unit","lat","lon","sumber_data"];
  dl("permukiman-bandung-raya.csv",[k.join(","),...D.map(s=>k.map(c=>`"${String(s[c]??"").replace(/"/g,'""')}"`).join(","))].join("\n"),"text/csv")};
 $("rst").onclick=()=>{if(confirm("Kembalikan ke data awal? Semua perubahan Anda akan hilang.")){try{localStorage.removeItem(KEY)}catch(e){}D=load();st.sel=null;$("detail").style.display="none";render()}};
