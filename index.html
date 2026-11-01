@@ -937,7 +937,7 @@ chips($("fj"),Object.keys(JC),st.j,JC);chips($("fw"),Object.keys(WC),st.w,WC);
 /* ---------- DETAIL ---------- */
 function show(s){st.sel=s;const f=s.fasilitas&&s.fasilitas.length?s.fasilitas.join(", "):"-";
  $("dbody").innerHTML=`<h2>${esc(s.nama)}</h2><span class="badge" style="border-color:${JC[s.jenis]}"><span class="dot" style="background:${JC[s.jenis]}"></span>${JN[s.jenis]}</span><span class="badge">${s.wilayah}</span>
- <span class="badge">${FP[fk(s)]?"Bentuk asli OSM":"Bentuk perkiraan"} · ${fmt(s.a)} ha</span>
+ <span class="badge">${(FP[fk(s)]||FPN[nk(s)]))?"Bentuk asli OSM":"Bentuk perkiraan"} · ${fmt(s.a)} ha</span>
  <dl><dt>Kecamatan</dt><dd>${esc(s.kecamatan||"-")}</dd><dt>Pengembang</dt><dd>${esc(s.pengembang||"Belum terdata")}</dd><dt>Tahun</dt><dd>${s.tahun_berdiri??"-"}</dd>
  <dt>Luas data</dt><dd>${s.luas_ha!=null?fmt(s.luas_ha)+" ha":"-"}</dd><dt>Unit</dt><dd>${fmt(s.jumlah_unit)}</dd><dt>Fasilitas</dt><dd>${esc(f)}</dd>
  <dt>Pusat</dt><dd>${s.lat.toFixed(5)}, ${s.lon.toFixed(5)}</dd><dt>Sumber</dt><dd>${esc(s.sumber_data||"-")}</dd></dl>
@@ -977,16 +977,13 @@ $("x").onclick=()=>{$("detail").style.display="none";st.sel=null;render()};
 map.on("zoomend",()=>{zc();drawAreas()});zc();
 
 /* ---------- BENTUK AREA ---------- */
-const FKEY="wgpbr-fp-v1",FFKEY="wgpbr-fpf-v1";let FP={},FPF={};
-try{FP=JSON.parse(localStorage.getItem(FKEY)||"{}");FPF=JSON.parse(localStorage.getItem(FFKEY)||"{}")}catch(e){}
-const saveFP=()=>{try{localStorage.setItem(FKEY,JSON.stringify(FP));localStorage.setItem(FFKEY,JSON.stringify(FPF))}catch(e){}};
-const fk=s=>s.oid&&(s.ot==="W"||s.ot==="R")?s.ot+s.oid:null;
-const dec=r=>{const k=Math.ceil(r.length/160),o=[];for(let i=0;i<r.length;i+=k)o.push([+r[i][1].toFixed(5),+r[i][0].toFixed(5)]);return o};
-const toPolys=g=>(g.type==="Polygon"?[g.coordinates]:g.coordinates).map(p=>p.map(dec));
-function latlngsOf(s){const k=fk(s);let P=k&&FP[k];
- if(!P){const[S_,N,W,E]=s.b;if(s.sh==="rect")P=[[[[S_,W],[S_,E],[N,E],[N,W]]]][0];
+const FNKEY="wgpbr-fpn-v1";let FPN={};try{FPN=JSON.parse(localStorage.getItem(FNKEY)||"{}")}catch(e){}
+const nk=s=>s.ot==="N"&&s.oid&&placed(s)?"N"+s.oid:null;
+function latlngsOf(s){const k=fk(s)||nk(s);let P=k&&(FP[k]||FPN[k]);
+ if(!P){let[S_,N,W,E]=s.b;
+  if(s.ot==="N"&&!s.sh){[S_,N,W,E]=sqB(s.lat,s.lon,Math.min(s.luas_ha||2,40));P=[[[[S_,W],[S_,E],[N,E],[N,W]]]][0]}
+  else if(s.sh==="rect")P=[[[[S_,W],[S_,E],[N,E],[N,W]]]][0];
   else{const cy=(S_+N)/2,cx=(W+E)/2,ry=(N-S_)/2,rx=(E-W)/2;P=[[Array.from({length:28},(_,i)=>{const a=i/28*6.2832;return[cy+ry*Math.sin(a),cx+rx*Math.cos(a)]})]]}}
- if(P[0]&&typeof P[0][0][0]==="number")P=[P];
  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;P.forEach(pg=>pg[0].forEach(p=>{const q=map.latLngToContainerPoint(p);x0=Math.min(x0,q.x);x1=Math.max(x1,q.x);y0=Math.min(y0,q.y);y1=Math.max(y1,q.y)}));
  const m=Math.max(x1-x0,y1-y0);if(m>=14)return P;const f=14/Math.max(m,.5),cx=(x0+x1)/2,cy=(y0+y1)/2;
  return P.map(pg=>pg.map(r=>r.map(p=>{const q=map.latLngToContainerPoint(p),l=map.containerPointToLatLng([cx+(q.x-cx)*f,cy+(q.y-cy)*f]);return[l.lat,l.lng]})))}
@@ -1000,7 +997,27 @@ async function loadFP(){if(loadingFP)return;const need=[...new Set(D.map(fk).fil
   catch(e){$("fpst").textContent="Gagal memuat bentuk OSM. Memakai bentuk perkiraan.";loadingFP=false;return}
   await new Promise(r=>setTimeout(r,1300))}
  loadingFP=false;fpStatus()}
-$("fpre").onclick=()=>{FPF={};saveFP();loadFP()};
+let loadingN=false;
+async function loadNodeShapes(){
+ if(loadingN)return;const need=D.filter(s=>nk(s)&&!FPN[nk(s)]);if(!need.length)return;loadingN=true;let i=0;
+ for(const s of need){
+  $("fpst").textContent=`Mencari batas area (titik OSM)… ${++i}/${need.length}`;
+  const nm=s.nama.replace(/[^A-Za-z0-9 ]/g,"").split(/\s+/).slice(0,2).join(".*");
+  const q=`[out:json][timeout:25];is_in(${s.lat},${s.lon})->.a;(way(pivot.a)["landuse"="residential"];way(around:700,${s.lat},${s.lon})["landuse"="residential"]["name"~"${nm}",i];);out geom tags;`;
+  try{
+   const r=await fetch("https://overpass-api.de/api/interpreter?data="+encodeURIComponent(q));if(!r.ok)throw 0;
+   const els=((await r.json()).elements||[]).filter(e=>e.geometry&&e.geometry.length>3&&e.bounds);
+   const ha=e=>areaHa([e.bounds.minlat,e.bounds.maxlat,e.bounds.minlon,e.bounds.maxlon]);
+   const named=els.filter(e=>e.tags&&e.tags.name&&new RegExp(nm,"i").test(e.tags.name));
+   const pool=(named.length?named:els).filter(e=>ha(e)<400).sort((a,b)=>ha(a)-ha(b));
+   FPN[nk(s)]=pool.length?[[pool[0].geometry.map(p=>[+p.lat.toFixed(5),+p.lon.toFixed(5)])]]:0;
+   localStorage.setItem(FNKEY,JSON.stringify(FPN));drawAreas();
+  }catch(e){break}
+  await new Promise(r=>setTimeout(r,1500));
+ }
+ loadingN=false;fpStatus();
+}	
+FPF={};FPN={};saveFP();loadFP().then(loadNodeShapes)};
 
 /* ---------- PICK MODES ---------- */
 let mode=null,p1=null,prev=null,draft=null,placing=null;
@@ -1140,6 +1157,6 @@ function layout(){$(isMob()?"sheetslot":"app").appendChild($("legend"));setSheet
 mq.addEventListener?mq.addEventListener("change",layout):mq.addListener(layout);
 addEventListener("resize",()=>{hh();setSheet(sheet,false)});addEventListener("orientationchange",()=>setTimeout(layout,250));
 new ResizeObserver(hh).observe($("top"));
-render();loadFP();layout();if(isMob())map.fitBounds([[-7.0,107.47],[-6.82,107.72]],{paddingTopLeft:[8,parseInt(getComputedStyle(document.documentElement).getPropertyValue("--hh"))||110],paddingBottomRight:[8,PEEK+8],animate:false});new ResizeObserver(()=>map.invalidateSize()).observe($("map"));
+render();loadFP().then(loadNodeShapes);layout();if(isMob())map.fitBounds([[-7.0,107.47],[-6.82,107.72]],{paddingTopLeft:[8,parseInt(getComputedStyle(document.documentElement).getPropertyValue("--hh"))||110],paddingBottomRight:[8,PEEK+8],animate:false});new ResizeObserver(()=>map.invalidateSize()).observe($("map"));
 </script>
 </body></html>
