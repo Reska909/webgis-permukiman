@@ -856,7 +856,7 @@ button,summary,.item,.sg{touch-action:manipulation}
       <div id="rres"></div>
       </div></details>
     <details open><summary>Daftar (<span id="n"></span>)</summary><div id="list"></div></details>
-    <div id="note">Bentuk area diambil dari <i>footprint</i> OpenStreetMap saat halaman dibuka (butuh internet, lalu disimpan di browser). Yang belum/gagal dimuat memakai bentuk perkiraan. Atribut luas, unit, tahun, dan fasilitas pada data awal berupa <b>estimasi</b>. Data yang Anda tambah/ubah tersimpan di browser ini.<br><span id="fpst"></span> <button class="btn" id="fpre" style="padding:2px 9px;font-size:12px;margin-top:6px">Muat ulang bentuk</button></div>
+    <div id="note">Bentuk area diambil dari <i>footprint</i> OpenStreetMap saat halaman dibuka (butuh internet, lalu disimpan di browser). Permukiman tanpa batas wilayah asli atau batas manual tidak ditampilkan pada peta. Atribut luas, unit, tahun, dan fasilitas pada data awal berupa <b>estimasi</b>. Data yang Anda tambah/ubah tersimpan di browser ini.<br><span id="fpst"></span> <button class="btn" id="fpre" style="padding:2px 9px;font-size:12px;margin-top:6px">Muat ulang bentuk</button></div>
   </div></aside>
   <div id="detail" class="glass"><button id="x" aria-label="Tutup">×</button><div id="dbody"></div></div>
   <div id="legend" class="glass"></div>
@@ -931,7 +931,9 @@ function bounds(s){const[S_,N,W,E]=s.b;const p1=map.latLngToContainerPoint([S_,W
  const w=Math.abs(p2.x-p1.x)<m,h=Math.abs(p1.y-p2.y)<m;if(!w&&!h)return[[S_,W],[N,E]];
  const cx=(p1.x+p2.x)/2,cy=(p1.y+p2.y)/2,a=map.containerPointToLatLng([cx-m/2,cy+m/2]),b=map.containerPointToLatLng([cx+m/2,cy-m/2]);
  return[[h?a.lat:S_,w?a.lng:W],[h?b.lat:N,w?b.lng:E]]}
-const fA=()=>D.filter(s=>placed(s)&&(!st.j.size||st.j.has(s.jenis))&&(!st.w.size||st.w.has(s.wilayah)));
+// Hanya tampilkan permukiman yang memiliki geometri batas asli OSM atau batas manual.
+const hasBoundary=s=>!!(s.poly&&s.poly.length>=4 || (fk(s)&&FP[fk(s)]&&FP[fk(s)].length) || (nk(s)&&FPN[nk(s)]&&FPN[nk(s)].length));
+const fA=()=>D.filter(s=>placed(s)&&hasBoundary(s)&&(!st.j.size||st.j.has(s.jenis))&&(!st.w.size||st.w.has(s.wilayah)));
 const filt=()=>fA().filter(s=>!st.q||(s.nama+" "+(s.kecamatan||"")+" "+(s.pengembang||"")).toLowerCase().includes(st.q));
 function chips(el,vals,set,colors){vals.forEach(v=>{const b=document.createElement("button");b.className="chip";b.setAttribute("aria-pressed","false");
  b.innerHTML=`<span class="dot" style="background:${colors[v]}"></span>${v}`;b.onclick=()=>{set.has(v)?set.delete(v):set.add(v);b.setAttribute("aria-pressed",set.has(v));render()};el.appendChild(b)})}
@@ -960,7 +962,7 @@ function drawAreas(){al.clearLayers();sl.clearLayers();const hov=matchMedia("(ho
    .bindTooltip(`<b>${esc(s.nama)}</b><br>${esc(s.kecamatan||"")}`,{sticky:true}).on("click",e=>mode?onClick(e):pick(s,false));
   if(hov&&!sel)p.on("mouseover",()=>p.setStyle({fillOpacity:.7})).on("mouseout",()=>p.setStyle({fillOpacity:.4}));p.addTo(al);
   if(sel)L.marker([s.lat,s.lon],{icon:L.divIcon({className:"",html:'<div class="ring"></div>',iconSize:[20,20],iconAnchor:[10,10]}),interactive:false,keyboard:false}).addTo(sl)})}
-function render(){const d=filt(),a=fA();$("n").textContent=d.length;$("cnt").textContent=D.filter(placed).length;drawAreas();
+function render(){const d=filt(),a=fA();$("n").textContent=d.length;$("cnt").textContent=a.length;drawAreas();
  const l=$("list");l.innerHTML="";[...d].sort((x,y)=>x.nama.localeCompare(y.nama)).forEach((s,i)=>{const e=document.createElement("div");e.className="item";e.style.setProperty("--c",JC[s.jenis]);e.style.setProperty("--i",Math.min(i,14));
   e.innerHTML=`<b>${esc(s.nama)}</b><span>${esc(s.kecamatan||"")} · ${s.wilayah}</span>`;e.onclick=()=>pick(s,true);l.appendChild(e)});
  const c={};a.forEach(s=>c[s.jenis]=(c[s.jenis]||0)+1);$("legend").innerHTML=Object.keys(JC).map(k=>`<span><span class="dot" style="background:${JC[k]}"></span>${k} <b>${c[k]||0}</b></span>`).join("");
@@ -988,15 +990,14 @@ const saveFP=()=>{try{localStorage.setItem(FKEY,JSON.stringify(FP));localStorage
 const fk=s=>s.oid&&(s.ot==="W"||s.ot==="R")?s.ot+s.oid:null;
 const dec=r=>{const k=Math.ceil(r.length/160),o=[];for(let i=0;i<r.length;i+=k)o.push([+r[i][1].toFixed(5),+r[i][0].toFixed(5)]);return o};
 const toPolys=g=>(g.type==="Polygon"?[g.coordinates]:g.coordinates).map(p=>p.map(dec));
-function latlngsOf(s){const k=fk(s)||nk(s);let P=s.poly?[[s.poly]]:k&&(FP[k]||FPN[k]);
- if(!P){let[S_,N,W,E]=s.b;
-  if(s.ot==="N"&&!s.sh&&s.a>100)[S_,N,W,E]=sqB(s.lat,s.lon,Math.min(s.luas_ha||2,40));
-  if(s.sh==="rect"||s.ot==="N")P=[[[[S_,W],[S_,E],[N,E],[N,W]]]][0];
-  else{const cy=(S_+N)/2,cx=(W+E)/2,ry=(N-S_)/2,rx=(E-W)/2;P=[[Array.from({length:28},(_,i)=>{const a=i/28*6.2832;return[cy+ry*Math.sin(a),cx+rx*Math.cos(a)]})]]}}
- if(P[0]&&typeof P[0][0][0]==="number")P=[P];
- let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;P.forEach(pg=>pg[0].forEach(p=>{const q=map.latLngToContainerPoint(p);x0=Math.min(x0,q.x);x1=Math.max(x1,q.x);y0=Math.min(y0,q.y);y1=Math.max(y1,q.y)}));
- const m=Math.max(x1-x0,y1-y0);if(m>=14)return P;const f=14/Math.max(m,.5),cx=(x0+x1)/2,cy=(y0+y1)/2;
- return P.map(pg=>pg.map(r=>r.map(p=>{const q=map.latLngToContainerPoint(p),l=map.containerPointToLatLng([cx+(q.x-cx)*f,cy+(q.y-cy)*f]);return[l.lat,l.lng]})))}
+function latlngsOf(s){
+ // Tidak membuat lingkaran/persegi perkiraan. Jika tidak ada geometri valid, jangan gambar.
+ let P=s.poly&&s.poly.length>=4?[[s.poly]]:(FP[fk(s)]||FPN[nk(s)]||null);
+ if(!P||!Array.isArray(P)||!P.length)return [];
+ P=P.filter(pg=>Array.isArray(pg)&&pg.length&&Array.isArray(pg[0])&&pg[0].length>=4);
+ if(!P.length)return [];
+ return P;
+}
 const fpStatus=()=>{const ks=D.map(fk).filter(Boolean),ns=D.map(nk).filter(Boolean);$("fpst").textContent=`Bentuk asli OSM: ${ks.filter(k=>FP[k]).length+ns.filter(k=>FPN[k]).length} dari ${ks.length+ns.length} area`};
 let loadingFP=false;
 async function loadFP(){if(loadingFP)return;const need=[...new Set(D.map(fk).filter(k=>k&&!FP[k]&&!FPF[k]))];fpStatus();if(!need.length)return;loadingFP=true;
@@ -1161,7 +1162,7 @@ function buildTable(){const q=$("dq").value.trim().toLowerCase(),w=$("dw").value
 $("dtb").onclick=e=>{const b=e.target.closest("button");if(!b)return;const s=D.find(x=>x.id===b.dataset.i);if(b.dataset.a==="e")openForm(s);else if(b.dataset.a==="d")del(s);else{view("map");pick(s,true)}};
 $("pp").onclick=()=>{pg=Math.max(0,pg-1);buildTable()};$("pn").onclick=()=>{pg++;buildTable()};
 const dl=(n,t,m)=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:m}));a.download=n;a.click()};
-$("egj").onclick=()=>dl("permukiman-bandung-raya.geojson",JSON.stringify({type:"FeatureCollection",features:D.filter(placed).map(s=>{const[S_,N,W,E]=s.b,{b,e,poly,...p}=s;return{type:"Feature",geometry:(s.poly||FP[fk(s)]||FPN[nk(s)])?{type:"MultiPolygon",coordinates:(s.poly?[[s.poly]]:(FP[fk(s)]||FPN[nk(s)])).map(pg=>pg.map(r=>r.map(q=>[q[1],q[0]])))}:{type:"Polygon",coordinates:[[[W,S_],[E,S_],[E,N],[W,N],[W,S_]]]},properties:p}})},null,1),"application/geo+json");
+$("egj").onclick=()=>dl("permukiman-bandung-raya.geojson",JSON.stringify({type:"FeatureCollection",features:D.filter(s=>placed(s)&&hasBoundary(s)).map(s=>{const polys=s.poly?[[s.poly]]:(FP[fk(s)]||FPN[nk(s)]);const{b,e,poly,...properties}=s;return{type:"Feature",geometry:{type:"MultiPolygon",coordinates:polys.map(pg=>pg.map(r=>r.map(q=>[q[1],q[0]])))},properties}})},null,1),"application/geo+json");
 $("ecsv").onclick=()=>{const k=["nama","jenis","wilayah","kecamatan","pengembang","tahun_berdiri","luas_ha","jumlah_unit","lat","lon","sumber_data"];
  dl("permukiman-bandung-raya.csv",[k.join(","),...D.map(s=>k.map(c=>`"${String(s[c]??"").replace(/"/g,'""')}"`).join(","))].join("\n"),"text/csv")};
 $("rst").onclick=()=>{if(confirm("Kembalikan ke data awal? Semua perubahan Anda akan hilang.")){try{localStorage.removeItem(KEY)}catch(e){}D=load();st.sel=null;$("detail").style.display="none";render()}};
